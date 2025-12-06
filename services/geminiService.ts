@@ -8,7 +8,7 @@ export const generateCharacterLore = async (classType: ClassType): Promise<{ nam
   try {
     const model = 'gemini-2.5-flash';
     const prompt = `
-      You are a gritty crime novelist writing for a cyberpunk noir game set in NYC 2044 called "Streets of New York".
+      You are a gritty crime novelist writing for a cyberpunk noir game set in mafia-era NYC 1997 called "Streets of New York".
       Generate a profile for a crew member with the class: ${classType}.
       
       Return ONLY a JSON object with the following keys:
@@ -52,7 +52,7 @@ export const generateMissionReport = async (crewNames: string[]): Promise<string
   try {
     const model = 'gemini-2.5-flash';
     const prompt = `
-      Write a very short, 3-sentence mission report for a gang operation in 2044 NYC.
+      Write a very short, 3-sentence mission report for a gang operation in 1997 NYC.
       The crew involved: ${crewNames.join(', ')}.
       The mission was a "Territory Grab" in the Bronx.
       Result: Success but messy.
