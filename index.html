@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Streets of New York [ALPHA]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display+SC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+      body {
+        background-color: #f0f4f8; /* Slightly cooler gray-blue base */
+      }
+      .font-waze {
+        font-family: 'Nunito', sans-serif;
+      }
+      .font-news {
+        font-family: 'Playfair Display SC', serif;
+      }
+      
+      /* Art Deco Pattern - Subtle geometric background */
+      .pattern-deco {
+        background-color: #ffffff;
+        background-image: radial-gradient(#d4af37 0.5px, transparent 0.5px), radial-gradient(#d4af37 0.5px, #ffffff 0.5px);
+        background-size: 20px 20px;
+        background-position: 0 0, 10px 10px;
+        opacity: 0.1;
+      }
+
+      /* Custom Scrollbar */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #b45309; /* Amber-700 */
+        border-radius: 3px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #78350f; /* Amber-900 */
+      }
+
+      @keyframes jump {
+        0% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-15px) scale(1.05); }
+        100% { transform: translateY(0) scale(1); }
+      }
+      .animate-jump {
+        animation: jump 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
