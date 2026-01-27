@@ -1,0 +1,169 @@
+
+import { ClassType } from '../types';
+
+// --- FALLBACK ASSETS (Base64 Encoded SVGs for reliability) ---
+
+// Generic User (Gray)
+const FALLBACK_GENERIC = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiBmaWxsPSIjNDc1NTY5Ij48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2NiZDVlMSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iNDAiIHI9IjIwIiBmaWxsPSIjNjQ3NDhiIi8+PHBhdGggZD0iTTIwIDkwIFE1MCA3MCA4MCA5MCBWMTAwIEgyMCBaIiBmaWxsPSIjNjQ3NDhiIi8+PC9zdmc+";
+
+// Thug (Dark Blue/Gray)
+const FALLBACK_THUG = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzMzNDE1NSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iNDUiIHI9IjIyIiBmaWxsPSIjMWUyOTNiIi8+PHBhdGggZD0iTTE1IDEwMCBRNTAgNjAgODUgMTAwIiBmaWxsPSIjMWUyOTNiIi8+PHJlY3QgeD0iMzAiIHk9IjM4IiB3aWR0aD0iMTUiIGhlaWdodD0iNiIgcng9IjIiIGZpbGw9IiM5NGEzYjgiLz48cmVjdCB4PSI1NSIgeT0iMzgiIHdpZHRoPSIxNSIgaGVpZ2h0PSI2IiByeD0iMiIgZmlsbD0iIzk0YTNiOCIvPjwvc3ZnPg==";
+
+// Hustler (Green/Gold)
+const FALLBACK_HUSTLER = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzA2NGUzYiIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iNDAiIHI9IjIwIiBmaWxsPSIjZWNmY2NiIi8+PHBhdGggZD0iTTIwIDEwMCBMNTAgNzAgTDgwIDEwMCBaIiBmaWxsPSIjMDY1ZjQ2Ii8+PHJlY3QgeD0iNDUiIHk9IjcwIiB3aWR0aD0iMTAiIGhlaWdodD0iMzAiIGZpbGw9IiMxMGI5ODEiLz48L3N2Zz4=";
+
+// Entertainer (Purple/Pink)
+const FALLBACK_ENTERTAINER = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzRjMWQ5NSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iNDUiIHI9IjIwIiBmaWxsPSIjZTg3OWY5Ii8+PHBhdGggZD0iTTUwIDEwIEw2MCA0MCBMOTAgNDAgTDY1IDYwIEw3NSA5MCBMNTAgNzAgTDI1IDkwIEwzNSA2MCBMMTAgNDAgTDQwIDQwIFoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2YwYWJmYyIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIwLjUiLz48cGF0aCBkPSJNMjAgMTAwIFE1MCA3MCA4MCAxMDAiIGZpbGw9IiNjMDI2ZDMiLz48L3N2Zz4=";
+
+// Smuggler (Brown/Blue)
+const FALLBACK_SMUGGLER = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzc4MzUwZiIvPjxyZWN0IHg9IjMwIiB5PSIyMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjIwIiByeD0iNSIgZmlsbD0iI2I0NTMwOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjIwIiBmaWxsPSIjZmVmM2M3Ii8+PHJlY3QgeD0iMzUiIHk9IjQ1IiB3aWR0aD0iMTIiIGhlaWdodD0iOCIgcng9IjIiIGZpbGw9IiM0NTFhMDMiIG9wYWNpdHk9IjAuOCIvPjxyZWN0IHg9IjUzIiB5PSI0NSIgd2lkdGg9IjEyIiBoZWlnaHQ9IjgiIHJ4PSIyIiBmaWxsPSIjNDUxYTAzIiBvcGFjaXR5PSIwLjgiLz48cGF0aCBkPSJNMTAgMTAwIFE1MCA2MCA5MCAxMDAiIGZpbGw9IiM5MjQwMGUiLz48L3N2Zz4=";
+
+// --- CONFIGURATION ---
+
+const AVATAR_BASE_URL = "https://api.dicebear.com/9.x/avataaars/svg";
+
+interface DiceBearOptions {
+  clothing?: string;
+  clothingColor?: string;
+  top?: string;
+  topProbability?: number;
+  accessories?: string;
+  accessoriesProbability?: number;
+  facialHair?: string;
+  facialHairProbability?: number;
+  eyes?: string;
+  mouth?: string;
+  skinColor?: string;
+}
+
+const getRoleOptions = (role?: string | ClassType): DiceBearOptions => {
+  const r = (role || '').toString().toLowerCase();
+
+  if (r.includes('thug') || r.includes('enforcer') || r.includes('tank')) {
+    return {
+      clothing: 'hoodie',
+      clothingColor: '262626',
+      eyes: 'squint',
+      top: 'shavedSides',
+      mouth: 'serious'
+    };
+  }
+  if (r.includes('smuggler') || r.includes('runner')) {
+    return {
+      clothing: 'overall',
+      clothingColor: '3b82f6',
+      accessories: 'eyepatch',
+      accessoriesProbability: 100,
+      top: 'hat'
+    };
+  }
+  if (r.includes('dealer') || r.includes('doc')) {
+    return {
+      clothing: 'blazerAndSweater',
+      clothingColor: 'ffffff',
+      accessories: 'prescription02',
+      accessoriesProbability: 80,
+      top: 'shortHairTheCaesar'
+    };
+  }
+  if (r.includes('hustler') || r.includes('boss') || r.includes('consigliere')) {
+    return {
+      clothing: 'blazerAndShirt',
+      clothingColor: '10b981',
+      facialHair: 'beardMajestic',
+      facialHairProbability: 40,
+      top: 'shortHairDreads01'
+    };
+  }
+  if (r.includes('entertainer')) {
+    return {
+      clothing: 'collarAndSweater',
+      clothingColor: 'd946ef',
+      top: 'longHairBigHair',
+      mouth: 'smile',
+      accessories: 'sunglasses',
+      accessoriesProbability: 60
+    };
+  }
+  // Default street look
+  return {
+    clothing: 'shirtCrewNeck',
+    clothingColor: '64748b'
+  };
+};
+
+// --- SERVICE METHODS ---
+
+export const AvatarService = {
+  /**
+   * Generates a stable URL for the character's avatar.
+   * Handles custom seeds containing URL parameters (from CharacterCreation).
+   */
+  getAvatarUrl: (seed: string, role?: string | ClassType): string => {
+    const params = new URLSearchParams();
+    
+    // 1. Check for Custom Seed (Generated by CharacterCreation)
+    // Format: "custom&param1=val1&param2=val2..."
+    let baseSeed = seed;
+    let isCustom = false;
+
+    if (seed && seed.toString().startsWith('custom&')) {
+        isCustom = true;
+        const parts = seed.split('&');
+        baseSeed = parts[0]; // 'custom'
+
+        // Extract embedded params
+        parts.slice(1).forEach(part => {
+            const [k, v] = part.split('=');
+            if (k && v) {
+                if (v === 'none') {
+                    // Handle 'none' value by setting probability to 0
+                    params.append(`${k}Probability`, '0');
+                } else {
+                    params.append(k, v);
+                    // Ensure the trait is visible if explicitly set
+                    if (['accessories', 'facialHair', 'top'].includes(k)) {
+                        params.append(`${k}Probability`, '100');
+                    }
+                }
+            }
+        });
+    } else {
+        // Standard Seed: Clean it
+        baseSeed = seed.replace(/[^a-zA-Z0-9-]/g, '');
+    }
+
+    params.append('seed', baseSeed);
+
+    // 2. Apply Role Defaults (Only if NOT custom)
+    // If the player customized their look, we don't want to override it with role defaults.
+    if (!isCustom) {
+        const options = getRoleOptions(role);
+        if (options.clothing) params.append('clothing', options.clothing);
+        if (options.clothingColor) params.append('clothingColor', options.clothingColor);
+        if (options.eyes) params.append('eyes', options.eyes);
+        if (options.mouth) params.append('mouth', options.mouth);
+        if (options.top) params.append('top', options.top);
+        if (options.accessories) params.append('accessories', options.accessories);
+        if (options.accessoriesProbability !== undefined) params.append('accessoriesProbability', options.accessoriesProbability.toString());
+        if (options.facialHair) params.append('facialHair', options.facialHair);
+        if (options.facialHairProbability !== undefined) params.append('facialHairProbability', options.facialHairProbability.toString());
+    }
+    
+    return `${AVATAR_BASE_URL}?${params.toString()}`;
+  },
+
+  /**
+   * Returns a local Data URI SVG as a fallback if the API fails.
+   */
+  getFallbackContent: (role?: string | ClassType): string => {
+    const r = (role || '').toString().toLowerCase();
+    
+    if (r.includes('thug')) return FALLBACK_THUG;
+    if (r.includes('hustler') || r.includes('boss')) return FALLBACK_HUSTLER;
+    if (r.includes('entertainer')) return FALLBACK_ENTERTAINER;
+    if (r.includes('smuggler')) return FALLBACK_SMUGGLER;
+    
+    return FALLBACK_GENERIC;
+  }
+};
