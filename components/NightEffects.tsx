@@ -10,12 +10,12 @@ interface NightEffectsProps {
     isNight: boolean;
 }
 
-const NightEffects: React.FC<NightEffectsProps> = ({ 
-    viewBox = "0 0 1500 1000", 
-    playerPos, 
-    isMoving, 
-    moveDuration, 
-    isNight 
+const NightEffects: React.FC<NightEffectsProps> = React.memo(({
+    viewBox = "0 0 1500 1000",
+    playerPos,
+    isMoving,
+    moveDuration,
+    isNight
 }) => {
     // Generate static random seeds for twinkling to prevent re-renders causing chaotic flashing
     const { lights, particles } = useMemo(() => {
@@ -100,13 +100,13 @@ const NightEffects: React.FC<NightEffectsProps> = ({
                 // Docks get up to 4 lights, regular blocks get up to 2
                 const maxLights = isDockZone ? 4 : 2;
                 const numLights = Math.floor(Math.random() * maxLights) + 1;
-                
+
                 const shuffled = possibleMounts.sort(() => 0.5 - Math.random());
                 const selectedMounts = shuffled.slice(0, numLights);
 
                 selectedMounts.forEach((mount, i) => {
                     const lightId = `light-${col}-${row}-${i}`;
-                    
+
                     let ax, bx, by, ay;
 
                     if (mount.side === 'west' || mount.side === 'east') {
@@ -131,15 +131,15 @@ const NightEffects: React.FC<NightEffectsProps> = ({
                         bx, by,
                         delay: Math.random() * 5,
                         // Static duration for consistent memoization
-                        pulseDuration: 30 + Math.random() * 15, 
+                        pulseDuration: 30 + Math.random() * 15,
                         radiusScale: 0.7 + Math.random() * 0.5
                     });
 
                     // Add Motes - Docks get more particles (industrial smog)
                     const moteBase = isDockZone ? 3 : 1;
                     const moteCount = Math.floor(Math.random() * 2) + moteBase;
-                    
-                    for(let m=0; m<moteCount; m++) {
+
+                    for (let m = 0; m < moteCount; m++) {
                         const angle = Math.random() * Math.PI * 2;
                         const dist = Math.random() * 12;
                         generatedParticles.push({
@@ -159,14 +159,14 @@ const NightEffects: React.FC<NightEffectsProps> = ({
     return (
         <>
             {/* Darkness Overlay with Spotlight */}
-            <svg 
+            <svg
                 className={`absolute inset-0 pointer-events-none z-30 transition-opacity duration-1000 ${isNight ? 'opacity-100' : 'opacity-0'}`}
-                viewBox={viewBox} 
-                preserveAspectRatio="xMidYMid meet" 
-                width="100%" 
+                viewBox={viewBox}
+                preserveAspectRatio="xMidYMid meet"
+                width="100%"
                 height="100%"
             >
-               <defs>
+                <defs>
                     <radialGradient id="spotlightGrad" gradientUnits="objectBoundingBox" cx="0.5" cy="0.5" r="0.5">
                         <stop offset="0%" stopColor="black" stopOpacity="1" />
                         <stop offset="40%" stopColor="black" stopOpacity="1" />
@@ -174,10 +174,10 @@ const NightEffects: React.FC<NightEffectsProps> = ({
                     </radialGradient>
                     <mask id="spotlightMask">
                         <rect x="-5000" y="-5000" width="15000" height="15000" fill="white" />
-                        <circle 
-                            cx="0" 
-                            cy="0" 
-                            r="200" 
+                        <circle
+                            cx="0"
+                            cy="0"
+                            r="200"
                             fill="url(#spotlightGrad)"
                             style={{
                                 transform: `translate(${playerPos.x}px, ${playerPos.y}px)`,
@@ -198,7 +198,7 @@ const NightEffects: React.FC<NightEffectsProps> = ({
                             <stop offset="30%" stopColor="#fbbf24" stopOpacity="0.5" />
                             <stop offset="100%" stopColor="#78350f" stopOpacity="0" />
                         </radialGradient>
-                        
+
                         <filter id="bulbBlur">
                             <feGaussianBlur stdDeviation="1.5" />
                         </filter>
@@ -212,14 +212,14 @@ const NightEffects: React.FC<NightEffectsProps> = ({
                             `}
                         </style>
                     </defs>
-                    
+
                     {/* 1. Fixtures (The Arms) */}
                     {lights.map(light => (
-                        <line 
+                        <line
                             key={`arm-${light.id}`}
                             x1={light.ax} y1={light.ay}
                             x2={light.bx} y2={light.by}
-                            stroke="#020617" 
+                            stroke="#020617"
                             strokeWidth="2"
                             strokeLinecap="square"
                             opacity="0.8"
@@ -229,10 +229,10 @@ const NightEffects: React.FC<NightEffectsProps> = ({
                     {/* 2. The Glow Pools */}
                     {lights.map(light => (
                         <g key={`glow-${light.id}`} transform={`translate(${light.bx}, ${light.by})`}>
-                            <circle 
-                                r={40 * light.radiusScale} 
-                                fill="url(#lampGradient)" 
-                                style={{ 
+                            <circle
+                                r={40 * light.radiusScale}
+                                fill="url(#lampGradient)"
+                                style={{
                                     animation: `pulseGlow ${light.pulseDuration}s ease-in-out infinite`,
                                     animationDelay: `${light.delay}s`,
                                     transformOrigin: 'center'
@@ -243,11 +243,11 @@ const NightEffects: React.FC<NightEffectsProps> = ({
 
                     {/* 3. The Bulbs */}
                     {lights.map(light => (
-                        <circle 
+                        <circle
                             key={`bulb-${light.id}`}
                             cx={light.bx} cy={light.by}
-                            r="2.5" 
-                            fill="#fff" 
+                            r="2.5"
+                            fill="#fff"
                             filter="url(#bulbBlur)"
                             opacity="0.9"
                         />
@@ -255,12 +255,12 @@ const NightEffects: React.FC<NightEffectsProps> = ({
 
                     {/* 4. Sodium Motes (Pink) */}
                     {particles.map(p => (
-                        <circle 
+                        <circle
                             key={p.id}
                             cx={p.cx}
                             cy={p.cy}
                             r={p.r}
-                            fill="#ff77e9" 
+                            fill="#ff77e9"
                             style={{
                                 opacity: p.opacity,
                             }}
@@ -270,6 +270,8 @@ const NightEffects: React.FC<NightEffectsProps> = ({
             </div>
         </>
     );
-};
+});
+
+NightEffects.displayName = 'NightEffects';
 
 export default NightEffects;

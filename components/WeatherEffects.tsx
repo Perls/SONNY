@@ -7,20 +7,49 @@ interface WeatherEffectsProps {
     viewBox?: string;
 }
 
-const WeatherEffects: React.FC<WeatherEffectsProps> = ({ weather, viewBox = "0 0 1500 1000" }) => {
-    
+const WeatherEffects: React.FC<WeatherEffectsProps> = React.memo(({ weather, viewBox = "0 0 1500 1000" }) => {
+
     // Determine Weather Type based on description
     const type = useMemo(() => {
         const d = weather.description.toLowerCase();
         if (d.includes('snow')) return 'snow';
         if (d.includes('drizzle') || d.includes('mist') || d.includes('light rain')) return 'light_rain';
-        if (d.includes('rain') || d.includes('storm') || d.includes('cloudy')) return 'heavy_rain'; // Cloudy acts as gloomy/slick
+        if (d.includes('rain') || d.includes('storm') || d.includes('cloudy')) return 'heavy_rain';
         if (d.includes('breeze') || d.includes('wind')) return 'windy';
         return 'clear';
     }, [weather.description]);
 
+    // Pre-compute all particle positions once to avoid Math.random() flickering on re-render
+    const heavyRainParticles = useMemo(() =>
+        Array.from({ length: 350 }).map((_, i) => ({
+            x: Math.random() * 2500 - 500,
+            len: 80 + Math.random() * 60,
+            opacity: 0.4 + Math.random() * 0.4,
+            speed: 0.45 + Math.random() * 0.15,
+            delay: Math.random() * -2,
+        })), []);
+
+    const drizzleParticles = useMemo(() =>
+        Array.from({ length: 1000 }).map((_, i) => ({
+            x: Math.random() * 2500 - 500,
+            len: 15 + Math.random() * 20,
+            opacity: 0.1 + Math.random() * 0.3,
+            speed: 1.2 + Math.random() * 0.8,
+            delay: Math.random() * -3,
+        })), []);
+
+    const snowParticles = useMemo(() =>
+        Array.from({ length: 80 }).map((_, i) => ({
+            cx: Math.random() * 1500,
+            cy: Math.random() * 1000,
+            r: 1.5 + Math.random(),
+            opacity: 0.6 + Math.random() * 0.4,
+            speed: 3 + Math.random() * 2,
+            delay: Math.random() * -5,
+        })), []);
+
     // --- CONFIGURATION ---
-    
+
     const isLightRain = type === 'light_rain';
     const isHeavyRain = type === 'heavy_rain';
     const isSnow = type === 'snow';
@@ -59,7 +88,7 @@ const WeatherEffects: React.FC<WeatherEffectsProps> = ({ weather, viewBox = "0 0
                     <filter id="wetRoadBlurHeavy">
                         <feGaussianBlur stdDeviation="4" />
                     </filter>
-                    
+
                     {/* Land Mask to prevent effects on water */}
                     <mask id="weatherLandMask">
                         <rect x="-5000" y="-5000" width="15000" height="15000" fill="white" />
@@ -99,10 +128,10 @@ const WeatherEffects: React.FC<WeatherEffectsProps> = ({ weather, viewBox = "0 0
 
                 {/* --- SNOW GROUND TINT --- */}
                 {isSnow && (
-                    <rect 
-                        x="-5000" y="-5000" width="15000" height="15000" 
-                        fill="#FAFAFF" 
-                        style={{ mixBlendMode: 'multiply', opacity: 0.3 }} 
+                    <rect
+                        x="-5000" y="-5000" width="15000" height="15000"
+                        fill="#FAFAFF"
+                        style={{ mixBlendMode: 'multiply', opacity: 0.3 }}
                         mask="url(#weatherLandMask)"
                     />
                 )}
@@ -117,122 +146,100 @@ const WeatherEffects: React.FC<WeatherEffectsProps> = ({ weather, viewBox = "0 0
 
                 {/* --- ROAD REFLECTIONS (Wet Slick) --- */}
                 {(isLightRain || isHeavyRain) && (
-                    <g 
-                        filter={isHeavyRain ? "url(#wetRoadBlurHeavy)" : "url(#wetRoadBlurLight)"} 
+                    <g
+                        filter={isHeavyRain ? "url(#wetRoadBlurHeavy)" : "url(#wetRoadBlurLight)"}
                         opacity={isHeavyRain ? 0.3 : 0.15}
                         mask="url(#weatherLandMask)"
                     >
                         {/* Vertical Avenues */}
                         {Array.from({ length: 15 }).map((_, col) => (
-                            <line 
-                                key={`r-ave-${col}`} 
-                                x1={col * 100} y1="0" x2={col * 100} y2="1000" 
-                                stroke="#fbbf24" strokeWidth="15" 
+                            <line
+                                key={`r-ave-${col}`}
+                                x1={col * 100} y1="0" x2={col * 100} y2="1000"
+                                stroke="#fbbf24" strokeWidth="15"
                             />
                         ))}
                         {/* Horizontal Streets */}
                         {Array.from({ length: 10 }).map((_, row) => (
-                            <line 
-                                key={`r-st-${row}`} 
-                                x1="0" y1={row * 100} x2="1500" y2={row * 100} 
-                                stroke="#fbbf24" strokeWidth="15" 
+                            <line
+                                key={`r-st-${row}`}
+                                x1="0" y1={row * 100} x2="1500" y2={row * 100}
+                                stroke="#fbbf24" strokeWidth="15"
                             />
                         ))}
                     </g>
                 )}
 
                 {/* --- PRECIPITATION ANIMATION --- */}
-                
+
                 {/* Heavy Rain */}
                 {isHeavyRain && (
                     <g transform="rotate(15, 750, 500)">
-                        {Array.from({ length: 350 }).map((_, i) => {
-                            const x = Math.random() * 2500 - 500; 
-                            const len = 80 + Math.random() * 60;
-                            const width = 2;
-                            const opacity = 0.4 + Math.random() * 0.4;
-                            const speed = 0.45 + Math.random() * 0.15; // Fast
-                            const delay = Math.random() * -2; 
-
-                            return (
-                                <rect 
-                                    key={`hrain-${i}`}
-                                    x={x} 
-                                    y={0} 
-                                    width={width} 
-                                    height={len}
-                                    fill="url(#rainGrad)"
-                                    opacity={opacity}
-                                    className="rain-particle"
-                                    style={{ 
-                                        animationDuration: `${speed}s`, 
-                                        animationDelay: `${delay}s` 
-                                    }}
-                                />
-                            );
-                        })}
+                        {heavyRainParticles.map((p, i) => (
+                            <rect
+                                key={`hrain-${i}`}
+                                x={p.x}
+                                y={0}
+                                width={2}
+                                height={p.len}
+                                fill="url(#rainGrad)"
+                                opacity={p.opacity}
+                                className="rain-particle"
+                                style={{
+                                    animationDuration: `${p.speed}s`,
+                                    animationDelay: `${p.delay}s`
+                                }}
+                            />
+                        ))}
                     </g>
                 )}
 
                 {/* Light Drizzle - Slower, denser, shorter, less opacity */}
                 {isLightRain && (
                     <g transform="rotate(-5, 750, 500)">
-                        {Array.from({ length: 1000 }).map((_, i) => {
-                            const x = Math.random() * 2500 - 500; 
-                            const len = 15 + Math.random() * 20; // Short
-                            const width = 1; // Thin
-                            const opacity = 0.1 + Math.random() * 0.3; // Faint
-                            const speed = 1.2 + Math.random() * 0.8; // Slower float
-                            const delay = Math.random() * -3;
-
-                            return (
-                                <rect 
-                                    key={`drizzle-${i}`}
-                                    x={x} 
-                                    y={0} 
-                                    width={width} 
-                                    height={len}
-                                    fill="url(#drizzleGrad)"
-                                    opacity={opacity}
-                                    className="rain-particle"
-                                    style={{ 
-                                        animationDuration: `${speed}s`, 
-                                        animationDelay: `${delay}s` 
-                                    }}
-                                />
-                            );
-                        })}
+                        {drizzleParticles.map((p, i) => (
+                            <rect
+                                key={`drizzle-${i}`}
+                                x={p.x}
+                                y={0}
+                                width={1}
+                                height={p.len}
+                                fill="url(#drizzleGrad)"
+                                opacity={p.opacity}
+                                className="rain-particle"
+                                style={{
+                                    animationDuration: `${p.speed}s`,
+                                    animationDelay: `${p.delay}s`
+                                }}
+                            />
+                        ))}
                     </g>
                 )}
 
                 {/* Snow */}
                 {isSnow && (
                     <g>
-                        {Array.from({ length: 80 }).map((_, i) => {
-                            const x = Math.random() * 1500;
-                            const y = Math.random() * 1000;
-                            const speed = 3 + Math.random() * 2;
-                            const delay = Math.random() * -5;
-                            return (
-                                <circle 
-                                    key={`snow-${i}`}
-                                    cx={x} cy={y} r={1.5 + Math.random()}
-                                    fill="white"
-                                    opacity={0.6 + Math.random() * 0.4}
-                                    className="animate-snow-fall"
-                                    style={{ 
-                                        animationDuration: `${speed}s`, 
-                                        animationDelay: `${delay}s` 
-                                    }}
-                                />
-                            );
-                        })}
+                        {snowParticles.map((p, i) => (
+                            <circle
+                                key={`snow-${i}`}
+                                cx={p.cx} cy={p.cy} r={p.r}
+                                fill="white"
+                                opacity={p.opacity}
+                                className="animate-snow-fall"
+                                style={{
+                                    animationDuration: `${p.speed}s`,
+                                    animationDelay: `${p.delay}s`
+                                }}
+                            />
+                        ))}
                     </g>
                 )}
 
             </svg>
         </div>
     );
-};
+});
+
+WeatherEffects.displayName = 'WeatherEffects';
 
 export default WeatherEffects;

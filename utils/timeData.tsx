@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getMoonPhase, isNightTime } from './timeUtils';
 
 export interface WeatherCondition {
@@ -23,7 +23,7 @@ export const useCityTime = () => {
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentTime(getSimulatedDate());
-        }, 1000);
+        }, 60000); // Throttled: weather/time only needs per-minute precision
         return () => clearInterval(timer);
     }, []);
 
@@ -33,10 +33,10 @@ export const useCityTime = () => {
         const minutes = date.getMinutes();
         const decimalTime = hour + minutes / 60;
         const isNight = isNightTime(date);
-        
+
         // Temperature Curve for Dec 9 (Low ~38F, High ~46F)
         // Coldest at 5 AM, Warmest at 2 PM
-        const tempBase = 42; 
+        const tempBase = 42;
         const tempSwing = 4;
         const temp = Math.round(tempBase + Math.sin((decimalTime - 9) * (Math.PI / 12)) * tempSwing);
 
@@ -65,7 +65,7 @@ export const useCityTime = () => {
         // Dec 9 Rise: ~7:12 AM, Set: ~4:30 PM
         const riseTime = 7.2;
         const setTime = 16.5;
-        
+
         let nextEventLabel = 'Dawn';
         let nextEventTime = '07:12';
         let delta = 0;
@@ -104,7 +104,8 @@ export const useCityTime = () => {
         };
     };
 
-    const weather = getWeather(currentTime);
+    // Memoize weather to avoid recalculating on every consumer render
+    const weather = useMemo(() => getWeather(currentTime), [currentTime]);
 
     return {
         currentTime,

@@ -44,7 +44,7 @@ const PolicePointer = ({ x, y }: { x: number, y: number }) => (
     </g>
 );
 
-const MapBackground: React.FC<MapBackgroundProps> = ({ 
+const MapBackground: React.FC<MapBackgroundProps> = React.memo(({ 
     holdings, 
     playerClass, 
     mapMode, 
@@ -53,6 +53,16 @@ const MapBackground: React.FC<MapBackgroundProps> = ({
     isNight,
     playerGridPos
 }) => {
+    // Pre-compute ALL block building layouts once (fixes Rules of Hooks violation & deduplicates generation)
+    const allBuildings = useMemo(() => {
+        const grid: BlockSubPlot[][] = [];
+        for (let col = 0; col < 15; col++) {
+            for (let row = 0; row < 10; row++) {
+                grid[col * 10 + row] = generateBlockBuildings(col, row);
+            }
+        }
+        return grid;
+    }, []);
     const getOwnedHolding = (gx: number, gy: number, slotIdx: number) => 
         holdings.find(h => h.x === gx && h.y === gy && h.slotIndex === slotIdx && !h.unitId);
         
@@ -251,7 +261,7 @@ const MapBackground: React.FC<MapBackgroundProps> = ({
                 {Array.from({ length: 15 }).map((_, col) => 
                     Array.from({ length: 10 }).map((_, row) => {
                         const isPriority = PRIORITY_TILES.some(t => t.col === col && t.row === row);
-                        const buildings = useMemo(() => generateBlockBuildings(col, row), [col, row]);
+                        const buildings = allBuildings[col * 10 + row];
                         const isMegablockTile = MEGABLOCK_TILES.some(t => t.col === col && t.row === row);
                         let highlightX = 4; let highlightY = 4; let highlightW = 92; let highlightH = 92;
                         if (isMegablockTile) {
@@ -339,7 +349,7 @@ const MapBackground: React.FC<MapBackgroundProps> = ({
                     </g>
                 ))}
                 {!isStreetsMode && PRIORITY_TILES.map((t) => {
-                     const buildings = generateBlockBuildings(t.col, t.row);
+                     const buildings = allBuildings[t.col * 10 + t.row];
                      const highPriorityBuildings = buildings.filter(b => isHighPriorityBuilding(b));
                      if (highPriorityBuildings.length === 0) return null;
                      return (
@@ -351,6 +361,8 @@ const MapBackground: React.FC<MapBackgroundProps> = ({
             </svg>
         </div>
     );
-};
+});
+
+MapBackground.displayName = 'MapBackground';
 
 export default MapBackground;
