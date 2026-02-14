@@ -20,7 +20,7 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({ seed, role, className, al
     // Reset state when seed changes
     setHasError(false);
     setIsLoading(true);
-    
+
     // Generate primary URL
     const url = AvatarService.getAvatarUrl(seed, role);
     setSrc(url);
@@ -42,7 +42,7 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({ seed, role, className, al
 
   return (
     <div className={`relative overflow-hidden ${className || ''}`}>
-      
+
       {/* Loading Placeholder */}
       {isLoading && !hasError && (
         <div className="absolute inset-0 bg-slate-200 animate-pulse flex items-center justify-center">
@@ -50,13 +50,15 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({ seed, role, className, al
         </div>
       )}
 
-      <img
-        src={src}
-        alt={alt || "Character Avatar"}
-        onError={handleError}
-        onLoad={handleLoad}
-        className={`w-full h-full object-cover transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'} ${grayscale ? 'grayscale' : ''}`}
-      />
+      {src && (
+        <img
+          src={src}
+          alt={alt || "Character Avatar"}
+          onError={handleError}
+          onLoad={handleLoad}
+          className={`w-full h-full object-cover transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'} ${grayscale ? 'grayscale' : ''}`}
+        />
+      )}
     </div>
   );
 };
